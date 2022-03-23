@@ -11,20 +11,23 @@ class PhoenixHtmlConnection extends PhoenixConnection {
   late WebSocket _conn;
   late Future _opened;
 
+  @override
   bool get isConnected => _conn.readyState == WebSocket.OPEN;
+  @override
   int get readyState => _conn.readyState;
 
   static PhoenixConnection provider(String endpoint) {
-    return new PhoenixHtmlConnection(endpoint);
+    return PhoenixHtmlConnection(endpoint);
   }
 
   PhoenixHtmlConnection(this._endpoint) {
-    _conn = new WebSocket(_endpoint);
+    _conn = WebSocket(_endpoint);
     _opened = _conn.onOpen.first;
   }
 
   // waitForConnection is idempotent, it can be called many
   // times before or after the connection is established
+  @override
   Future<PhoenixConnection> waitForConnection() async {
     if (_conn.readyState == WebSocket.OPEN) {
       return this;
@@ -34,16 +37,22 @@ class PhoenixHtmlConnection extends PhoenixConnection {
     return this;
   }
 
+  @override
   void close([int? code, String? reason]) => _conn.close(code, reason);
+  @override
   void send(String data) => _conn.sendString(data);
 
-  void onClose(void callback()) => _conn.onClose.listen((e) {
+  @override
+  void onClose(void Function() callback) => _conn.onClose.listen((e) {
         callback();
       });
+  @override
   void onError(void callback(err)) => _conn.onError.listen((e) {
         callback(e);
       });
-  void onMessage(void callback(String m)) => _conn.onMessage.listen((e) {
+  @override
+  void onMessage(void Function(String m) callback) =>
+      _conn.onMessage.listen((e) {
         callback(_messageToString(e));
       });
 

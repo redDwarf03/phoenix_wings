@@ -9,7 +9,7 @@ class PhoenixMessage {
   /// Convenience function for decoding received Phoenix messages
   static PhoenixMessage decode(rawPayload) {
     final decoded = json.decode(rawPayload);
-    return new PhoenixMessage(
+    return PhoenixMessage(
         decoded[0], decoded[1], decoded[2], decoded[3], decoded[4]);
   }
 

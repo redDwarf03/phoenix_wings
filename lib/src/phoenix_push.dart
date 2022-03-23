@@ -17,7 +17,7 @@ class PhoenixPush {
   Timer? timeoutTimer;
 
   PhoenixPush(this.channel, this.event, this.payload, this.timeout) {
-    ref = this.channel!.socket!.makeRef();
+    ref = channel!.socket!.makeRef();
   }
 
   PhoenixPush receive(String status, Function(Map? response) callback) {
@@ -25,7 +25,7 @@ class PhoenixPush {
       callback(receivedResp);
     }
 
-    this.recHooks.add(new _PhoenixPushStatus(status, callback));
+    recHooks.add(_PhoenixPushStatus(status, callback));
     return this;
   }
 
@@ -64,8 +64,8 @@ class PhoenixPush {
     startTimeout();
     refEvent = channel!.replyEventName(ref);
     sent = true;
-    channel!.socket!.push(new PhoenixMessage(
-        channel!.joinRef, ref, channel!.topic, event, payload));
+    channel!.socket!.push(
+        PhoenixMessage(channel!.joinRef, ref, channel!.topic, event, payload));
   }
 
   startTimeout() {
@@ -79,7 +79,7 @@ class PhoenixPush {
       matchReceive(payload);
     });
 
-    timeoutTimer = new Timer(new Duration(milliseconds: timeout!), () {
+    timeoutTimer = Timer(Duration(milliseconds: timeout!), () {
       trigger("timeout", {});
     });
   }

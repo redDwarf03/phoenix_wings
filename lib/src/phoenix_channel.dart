@@ -17,7 +17,7 @@ class PhoenixChannelEvents {
   static const join = "phx_join";
   static const reply = "phx_reply";
   static const leave = "phx_leave";
-  static const lifecycleEvents = const [close, error, join, reply, leave];
+  static const lifecycleEvents = [close, error, join, reply, leave];
   static bool lifecycleEvent(event) =>
       lifecycleEvents.any((eventName) => event == eventName);
 }
@@ -42,12 +42,13 @@ class PhoenixChannel {
   /// authorization.
   ///
   PhoenixChannel(this._topic, this._params, this.socket) {
-    _joinPush =
-        new PhoenixPush(this, PhoenixChannelEvents.join, _params, timeout);
+    _joinPush = PhoenixPush(this, PhoenixChannelEvents.join, _params, timeout);
 
     _joinPush!.receive("ok", (msg) {
       _state = PhoenixChannelState.joined;
-      _pushBuffer.forEach((pushEvent) => pushEvent.send());
+      for (var pushEvent in _pushBuffer) {
+        pushEvent.send();
+      }
       _pushBuffer = [];
     });
 
@@ -56,7 +57,7 @@ class PhoenixChannel {
         return;
       }
       final leavePush =
-          new PhoenixPush(this, PhoenixChannelEvents.leave, {}, timeout);
+          PhoenixPush(this, PhoenixChannelEvents.leave, {}, timeout);
       leavePush.send();
       _state = PhoenixChannelState.errored;
       _joinPush!.reset();
@@ -83,8 +84,7 @@ class PhoenixChannel {
   }
 
   _startRejoinTimer() {
-    rejoinTimer =
-        new Timer.periodic(new Duration(milliseconds: timeout!), (timer) {
+    rejoinTimer = Timer.periodic(Duration(milliseconds: timeout!), (timer) {
       if (_state == PhoenixChannelState.joined) {
         timer.cancel();
         rejoinTimer = null;
@@ -153,10 +153,11 @@ class PhoenixChannel {
     };
 
     final leavePush =
-        new PhoenixPush(this, PhoenixChannelEvents.leave, {}, timeout);
+        PhoenixPush(this, PhoenixChannelEvents.leave, {}, timeout);
 
     leavePush
-        .receive("ok", onCloseCallback as dynamic Function(Map<dynamic, dynamic>?))
+        .receive(
+            "ok", onCloseCallback as dynamic Function(Map<dynamic, dynamic>?))
         .receive("timeout", onCloseCallback);
 
     leavePush.send();
@@ -173,7 +174,7 @@ class PhoenixChannel {
     if (!_joinedOnce) {
       throw ("Tried to push event before joining channel");
     }
-    final pushEvent = new PhoenixPush(this, event, payload, timeout);
+    final pushEvent = PhoenixPush(this, event, payload, timeout);
     if (canPush) {
       pushEvent.send();
     } else {
@@ -197,7 +198,7 @@ class PhoenixChannel {
 
   /// @nodoc
   trigger(String? event, [Map? payload, String? ref, String? joinRefParam]) {
-    final handledPayload = this.onMessage(event, payload, ref);
+    final handledPayload = onMessage(event, payload, ref);
     if (payload != null && handledPayload == null) {
       throw ("channel onMessage callback must return payload modified or unmodified");
     }
@@ -213,7 +214,7 @@ class PhoenixChannel {
   /// with matching name
   int on(String? event, PhoenixMessageCallback callback) {
     final ref = _bindingRef++;
-    _bindings.add(new _PhoenixChannelBinding(event, ref, callback));
+    _bindings.add(_PhoenixChannelBinding(event, ref, callback));
     return ref;
   }
 

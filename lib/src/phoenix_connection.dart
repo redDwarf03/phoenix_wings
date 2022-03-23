@@ -15,7 +15,7 @@ abstract class PhoenixConnection {
 
   void send(String data);
 
-  void onClose(void callback());
-  void onError(void callback(dynamic err));
-  void onMessage(void callback(String? message));
+  void onClose(void Function() callback);
+  void onError(void Function(dynamic err) callback);
+  void onMessage(void Function(String? message) callback);
 }

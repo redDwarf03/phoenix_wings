@@ -30,7 +30,7 @@ void main() {
   });
 
   test("Builds a new Push", () {
-    final push = new PhoenixPush(channel, "phx_join", {}, 100);
+    final push = PhoenixPush(channel, "phx_join", {}, 100);
 
     expect(push.ref, "1");
     expect(push.event, "phx_join");
@@ -39,7 +39,7 @@ void main() {
   });
 
   test("Executes callback when hasReceived message", () {
-    final push = new PhoenixPush(channel, "event", {}, 100);
+    final push = PhoenixPush(channel, "event", {}, 100);
     push.receivedResp = {"status": "ok"};
 
     var callbackExecuted = false;
@@ -52,7 +52,7 @@ void main() {
   });
 
   test("Registers callback and executes matching hooks", () {
-    final push = new PhoenixPush(channel, "event", {}, 100);
+    final push = PhoenixPush(channel, "event", {}, 100);
 
     var callbackExecuted = false;
     Map? payload;
@@ -78,7 +78,7 @@ void main() {
   });
 
   test("Can reset", () {
-    final push = new PhoenixPush(channel, "event", {}, 100);
+    final push = PhoenixPush(channel, "event", {}, 100);
 
     push.refEvent = "refEvent";
     expect(push.ref, "1");
@@ -91,18 +91,18 @@ void main() {
   });
 
   test("triggers timeout when response not received in time", () async {
-    final push = new PhoenixPush(channel, "event", {}, 10);
+    final push = PhoenixPush(channel, "event", {}, 10);
     when(channel.replyEventName("1")).thenReturn("chan_reply_1");
     push.send();
 
-    await new Future<Null>.delayed(new Duration(milliseconds: 90));
+    await Future<Null>.delayed(const Duration(milliseconds: 90));
     verify(
         channel.trigger("chan_reply_1", {"status": "timeout", "response": {}}));
   });
 
   test("clears timer when response received in time", () async {
-    final realChannel = new PhoenixChannel("topic", {}, socket);
-    final push = new PhoenixPush(realChannel, "event", {}, 100);
+    final realChannel = PhoenixChannel("topic", {}, socket);
+    final push = PhoenixPush(realChannel, "event", {}, 100);
     push.send();
     expect(push.timeoutTimer, isNotNull);
     realChannel.trigger(push.refEvent, {"status": "ok", "response": {}});

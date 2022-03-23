@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:phoenix_wings/phoenix_wings.dart';
 import 'package:intl/intl.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, this.title}) : super(key: key);
   final String? title;
   // if you want to run both phoenix and flutter [with emulator] in the same
-  // machine, point to your local machine [not localhost], as described in 
+  // machine, point to your local machine [not localhost], as described in
   // the README.md file.
   final socket = PhoenixSocket("ws://my_server:4000/socket/websocket");
 
@@ -62,7 +64,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _textController.clear();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(
                   children: <Widget>[
                     ListTile(
-                        leading: Icon(Icons.message),
+                        leading: const Icon(Icons.message),
                         title: Text(message.text!),
                         subtitle: Text(message.time)),
                   ],
@@ -89,23 +90,20 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: messages.length,
             ),
           ),
-          Divider(
-              height: 1.0,
+          const Divider(
+            height: 1.0,
           ),
-          Container(
-              child: MessageComposer(
+          MessageComposer(
             textController: _textController,
             sendMessage: _sendMessage,
-          ))
+          )
         ],
       ),
     );
   }
 }
 
-/**
- * Represents the chat message
- */
+/// Represents the chat message
 
 class ChatMessage {
   final String? text;
@@ -115,32 +113,29 @@ class ChatMessage {
   get time => DateFormat.Hms().format(received);
 }
 
-/**
- * Messaage box to compose and press the send button
- */
+/// Messaage box to compose and press the send button
 
 class MessageComposer extends StatelessWidget {
   final textController;
   final sendMessage;
 
-  MessageComposer({this.textController, this.sendMessage});
+  const MessageComposer({this.textController, this.sendMessage});
+  @override
   build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           children: <Widget>[
             Flexible(
               child: TextField(
                   controller: textController,
                   onSubmitted: sendMessage,
-                  decoration:
-                      InputDecoration.collapsed(hintText: "Send a message")),
+                  decoration: const InputDecoration.collapsed(
+                      hintText: "Send a message")),
             ),
-            Container(
-              child: IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () => sendMessage(textController.text)),
-            )
+            IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: () => sendMessage(textController.text))
           ],
         ));
   }

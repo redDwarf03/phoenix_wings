@@ -12,9 +12,9 @@ PhoenixSocket? socket;
 
 void main() {
   setUp(() async {
-    server = new MockServer(4001);
+    server = MockServer(4001);
     await server.start();
-    socket = new PhoenixSocket("ws://localhost:4001/socket/websocket");
+    socket = PhoenixSocket("ws://localhost:4001/socket/websocket");
   });
 
   tearDown(() async {
@@ -68,10 +68,10 @@ void main() {
     });
   });
 
-  [
+  for (var msg in [
     PhoenixMessage("1", "ref", "topic", "event", {"payload": "payload"}),
     PhoenixMessage(null, "ref", "topic", "event", {"payload": "payload"}),
-  ].forEach((msg) {
+  ]) {
     test(
         "parses raw message and triggers channel event: joinRef is ${msg.joinRef}",
         () async {
@@ -80,7 +80,7 @@ void main() {
       await socket!.connect();
       final targetChannel = socket!.channel("topic");
       var callbackInvoked = false;
-      var calledWithPayload;
+      Map? calledWithPayload;
       targetChannel.on("event", (payload, ref, joinRef) {
         callbackInvoked = true;
         calledWithPayload = payload;
@@ -94,11 +94,11 @@ void main() {
 
       server.sendMessage(message);
 
-      await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      await Future<Null>.delayed(const Duration(milliseconds: 100));
 
       expect(callbackInvoked, true);
       expect(calledWithPayload, msg.payload);
       expect(otherCallbackInvoked, false);
     });
-  });
+  }
 }

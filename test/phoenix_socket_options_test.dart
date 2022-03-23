@@ -5,7 +5,7 @@ import 'package:phoenix_wings/src/phoenix_socket_options.dart';
 
 void main() {
   test("Can create socket options with default values", () {
-    final options = new PhoenixSocketOptions();
+    final options = PhoenixSocketOptions();
     expect(options.timeout, 10000);
     expect(options.heartbeatIntervalMs, 30000);
     expect(options.reconnectAfterMs, null);
@@ -13,7 +13,7 @@ void main() {
   });
 
   test("Can create socket options with overridden timeout", () {
-    final options = new PhoenixSocketOptions(timeout: 99);
+    final options = PhoenixSocketOptions(timeout: 99);
     expect(options.timeout, 99);
     expect(options.heartbeatIntervalMs, 30000);
     expect(options.reconnectAfterMs, null);
@@ -21,7 +21,7 @@ void main() {
   });
 
   test("Can create socket options with overridden heartbeatIntervalMs", () {
-    final options = new PhoenixSocketOptions(heartbeatIntervalMs: 99);
+    final options = PhoenixSocketOptions(heartbeatIntervalMs: 99);
     expect(options.timeout, 10000);
     expect(options.heartbeatIntervalMs, 99);
     expect(options.reconnectAfterMs, null);
@@ -29,7 +29,7 @@ void main() {
   });
 
   test("Cannot override socket options with vsn params", () {
-    final options = new PhoenixSocketOptions(params: {});
+    final options = PhoenixSocketOptions(params: {});
     expect(options.timeout, 10000);
     expect(options.heartbeatIntervalMs, 30000);
     expect(options.reconnectAfterMs, null);
@@ -37,7 +37,7 @@ void main() {
   });
 
   test("Can create socket options with overridden params", () {
-    final options = new PhoenixSocketOptions(params: {"token": "test"});
+    final options = PhoenixSocketOptions(params: {"token": "test"});
     expect(options.timeout, 10000);
     expect(options.heartbeatIntervalMs, 30000);
     expect(options.reconnectAfterMs, null);

@@ -186,7 +186,7 @@ handleStringMessage(
       channel.sink.add("pong");
       break;
     default:
-      throw new UnsupportedError("message not supported: $message");
+      throw UnsupportedError("message not supported: $message");
   }
 }
 
@@ -202,13 +202,13 @@ handleListMessage(MockServer server, List message) {
       print(param);
       break;
     default:
-      throw new UnsupportedError("message not supported: $message");
+      throw UnsupportedError("message not supported: $message");
   }
 }
 
 // used for hybrid tests
 hybridMain(StreamChannel channel) async {
-  final server = new MockServer(4002);
+  final server = MockServer(4002);
   await server.start();
 
   channel.stream.listen((message) async {
@@ -217,7 +217,7 @@ hybridMain(StreamChannel channel) async {
     } else if (message is List) {
       handleListMessage(server, message);
     } else {
-      throw new UnsupportedError("message not supported: $message");
+      throw UnsupportedError("message not supported: $message");
     }
   });
 }

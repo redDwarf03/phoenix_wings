@@ -7,13 +7,14 @@ import 'package:phoenix_wings/phoenix_wings.dart';
 
 import 'mock_server.dart';
 
-typedef PhoenixSocket SocketFactory(String e, PhoenixSocketOptions? so);
+typedef SocketFactory = PhoenixSocket Function(
+    String e, PhoenixSocketOptions? so);
 
 void testPhoenixSocket(SocketFactory makeSocket) {
   late RemoteMockServer server;
   late PhoenixSocket socket;
   setUp(() async {
-    server = new RemoteMockServer.hybrid();
+    server = RemoteMockServer.hybrid();
     await server.waitForServer();
 
     socket = makeSocket("ws://localhost:4002/socket/websocket", null);
@@ -27,8 +28,8 @@ void testPhoenixSocket(SocketFactory makeSocket) {
   });
 
   test("Accepts query parameters via an options object", () {
-    final endpoint = "ws://localhost:4002/socket";
-    final options = new PhoenixSocketOptions();
+    const endpoint = "ws://localhost:4002/socket";
+    final options = PhoenixSocketOptions();
     options.params = {"stuff": "things"};
     final socket = makeSocket(endpoint, options);
     expect(socket.endpoint!.queryParameters, options.params);
@@ -69,21 +70,21 @@ void testPhoenixSocket(SocketFactory makeSocket) {
       await socket.connect();
       expect(socket.isConnected, true);
 
-      await new Future<Null>.delayed(new Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
 
       expect(callbackCalled, true);
     });
 
     test("Triggers callbacks on message", () async {
-      final message = PhoenixSerializer
-          .encode(new PhoenixMessage(null, "ref", "topic", "event", {}));
+      final message = PhoenixSerializer.encode(
+          PhoenixMessage(null, "ref", "topic", "event", {}));
       late PhoenixMessage receivedMessage;
       socket.onMessage((msg) => receivedMessage = msg);
 
       await socket.connect();
 
       server.sendMessage(message);
-      await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
 
       expect(receivedMessage.ref, "ref");
       expect(receivedMessage.joinRef, null);
@@ -102,7 +103,7 @@ void testPhoenixSocket(SocketFactory makeSocket) {
       expect(socket.isConnected, true);
       await server.testDisconnect();
 
-      await new Future<Null>.delayed(new Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
 
       expect(callbackCalled, true);
     });
@@ -110,13 +111,13 @@ void testPhoenixSocket(SocketFactory makeSocket) {
 
   group("Heartbeat", () {
     test("Sends heartbeat", () async {
-      final options = new PhoenixSocketOptions();
+      final options = PhoenixSocketOptions();
       options.heartbeatIntervalMs = 5;
       final socket =
           makeSocket("ws://localhost:4002/socket/websocket", options);
       await socket.connect();
 
-      await new Future<Null>.delayed(new Duration(milliseconds: 12));
+      await Future<void>.delayed(const Duration(milliseconds: 12));
       socket.stopHeartbeat();
       expect(await server.heartbeat, greaterThan(0));
     });
@@ -128,21 +129,21 @@ void testPhoenixSocket(SocketFactory makeSocket) {
       socket.onClose((_) {
         closed = true;
       });
-      final timeout = new Duration(milliseconds: 50);
-      socket.sendHeartbeat(new Timer(timeout, () {}));
+      const timeout = Duration(milliseconds: 50);
+      socket.sendHeartbeat(Timer(timeout, () {}));
       expect(closed, false);
-      socket.sendHeartbeat(new Timer(timeout, () {}));
-      await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      socket.sendHeartbeat(Timer(timeout, () {}));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       expect(closed, true);
     });
 
     test("pushes heartbeat data when connected", () async {
-      final options = new PhoenixSocketOptions();
+      final options = PhoenixSocketOptions();
       options.heartbeatIntervalMs = 5;
       final socket =
           makeSocket("ws://localhost:4002/socket/websocket", options);
       await socket.connect();
-      await new Future<Null>.delayed(new Duration(milliseconds: 15));
+      await Future<void>.delayed(const Duration(milliseconds: 15));
       socket.stopHeartbeat();
 
       final hearbeatMessage = await server.heartbeatMessageReceived;
@@ -152,13 +153,13 @@ void testPhoenixSocket(SocketFactory makeSocket) {
     });
   });
   group("push", () {
-    final msg = new PhoenixMessage(
+    final msg = PhoenixMessage(
         "joinRef", "ref", "topic", "test-push", {"payload": "payload"});
 
     test("Sends data when connected", () async {
       await socket.connect();
       socket.push(msg);
-      await new Future<Null>.delayed(new Duration(milliseconds: 60));
+      await Future<void>.delayed(const Duration(milliseconds: 60));
     });
 
     test("buffers data send when not connected", () async {
@@ -167,7 +168,7 @@ void testPhoenixSocket(SocketFactory makeSocket) {
       expect(socket.sendBufferLength, 0);
       await socket.disconnect();
 
-      await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       expect(socket.isConnected, false);
 
       msg.ref = "afterClose";
@@ -181,7 +182,7 @@ void testPhoenixSocket(SocketFactory makeSocket) {
       expect(socket.sendBufferLength, 2);
       await socket.connect();
 
-      await new Future<Null>.delayed(new Duration(milliseconds: 50));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(socket.sendBufferLength, 0);
     });
   });

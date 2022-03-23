@@ -14,19 +14,22 @@ class PhoenixIoConnection extends PhoenixConnection {
   // Use completer for close event because:
   //  * onDone of WebSocket doesn't fire consistently :(
   //  * this enables setting onClose/onDone/onError separately
-  Completer _closed = new Completer();
+  Completer _closed = Completer();
 
+  @override
   bool get isConnected => _conn?.readyState == WebSocket.open;
+  @override
   int get readyState => _conn?.readyState ?? WebSocket.closed;
 
   static PhoenixConnection provider(String endpoint) {
-    return new PhoenixIoConnection(endpoint);
+    return PhoenixIoConnection(endpoint);
   }
 
   PhoenixIoConnection(this._endpoint);
 
   // waitForConnection is idempotent, it can be called many
   // times before or after the connection is established
+  @override
   Future<PhoenixConnection> waitForConnection() async {
     _connFuture ??= WebSocket.connect(_endpoint);
     _conn = await _connFuture;
@@ -34,8 +37,10 @@ class PhoenixIoConnection extends PhoenixConnection {
     return this;
   }
 
+  @override
   void close([int? code, String? reason]) => _conn?.close(code, reason);
 
+  @override
   void send(String data) {
     if (isConnected) {
       try {
@@ -46,12 +51,14 @@ class PhoenixIoConnection extends PhoenixConnection {
     }
   }
 
-  void onClose(void callback()) {
+  @override
+  void onClose(void Function() callback) {
     _closed.future.then((e) {
       callback();
     });
   }
 
+  @override
   void onError(void callback(dynamic)) {
     _conn!.handleError(callback);
     _conn!.done.catchError(callback);
@@ -62,7 +69,8 @@ class PhoenixIoConnection extends PhoenixConnection {
     return e as String?;
   }
 
-  void onMessage(void callback(String? m)) {
+  @override
+  void onMessage(void Function(String? m) callback) {
     _conn!.listen((e) {
       callback(_messageToString(e));
     }, onDone: () {
